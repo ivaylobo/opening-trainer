@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html lang="bg">
+
+<head>
+    <meta charset="UTF-8" />
+    <title>Opening Trainer</title>
+
+    <!-- Chessboard CSS -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/chessboard-js/1.0.0/chessboard-1.0.0.min.css" />
+
+    <style>
+        body {
+            background: #1e1e1e;
+            color: white;
+            font-family: Arial, sans-serif;
+            text-align: center;
+            padding: 20px;
+        }
+        
+        #board {
+            width: 400px;
+            margin: 20px auto;
+        }
+        
+        #board.showing-opening {
+            pointer-events: none;
+        }
+        
+        #board-container {
+            position: relative;
+            width: 400px;
+            margin: 20px auto;
+        }
+        
+        #pauseButton {
+            position: absolute;
+            right: -90px;
+            top: 50%;
+            transform: translateY(-50%);
+            display: none;
+        }
+        
+        select,
+        button {
+            padding: 10px;
+            margin: 10px;
+            font-size: 16px;
+        }
+        
+        #feedback {
+            margin-top: 10px;
+            font-size: 18px;
+        }
+        
+        .correct {
+            color: #4caf50;
+        }
+        
+        .wrong {
+            color: #f44336;
+        }
+    </style>
+</head>
+
+<body>
+
+        <h2>Opening Trainer</h2>
+
+    <select id="openingSelect"></select>
+        <button id="resetButton">Restart</button>
+        <button id="showButton">Show</button>
+
+    <div id="board-container">
+        <div id="board"></div>
+                <button id="pauseButton">Pause</button>
+    </div>
+
+    <div id="feedback"></div>
+
+    <!-- Libraries -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/chess.js/0.10.3/chess.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/chessboard-js/1.0.0/chessboard-1.0.0.min.js"></script>
+
+    <script>
+        const openings = {
+            "Caro-Kann": [
+                "e4", "c6",
+                "d4", "d5",
+                "Nc3", "dxe4",
+                "Nxe4", "Bf5",
+                "Ng3", "Bg6",
+                "Nf3", "Nd7",
+                "Be2", "e6",
+                "O-O", "Ngf6"
+            ],
+            "Scandinavian": [
+                "e4", "d5",
+                "exd5", "Qxd5",
+                "Nc3", "Qa5",
+                "d4", "Nf6",
+                "Nf3", "c6",
+                "Bc4", "Bf5",
+                "O-O", "e6"
+            ]
+        };
+
+        let game;
+        let board;
+        let moveIndex = 0;
+        let currentOpening = [];
+        let isShowing = false;
+        let isPaused = false;
+        let previewGame = null;
+        let previewMoves = [];
+        let previewIndex = 0;
+        let previewTimer = null;
+        let replyTimer = null;
+        let openingComplete = false;
+        const STEP_DELAY_MS = 2000;
+
+        const select = document.getElementById("openingSelect");
+        const boardElement = document.getElementById("board");
+        const resetButton = document.getElementById("resetButton");
+        const showButton = document.getElementById("showButton");
+        const pauseButton = document.getElementById("pauseButton");
+        const feedbackEl = document.getElementById("feedback");
+
+        Object.keys(openings).forEach(name => {
+            const opt = document.createElement("option");
+            opt.value = name;
+            opt.textContent = name;
+            select.appendChild(opt);
+        });
+
+        select.addEventListener("change", start);
+        resetButton.addEventListener("click", reset);
+        showButton.addEventListener("click", showOpening);
+        pauseButton.addEventListener("click", togglePause);
+
+        boardElement.addEventListener("mouseenter", () => {
+            if (isShowing) {
+                pauseButton.style.display = "inline-block";
+            }
+        });
+
+        boardElement.addEventListener("mouseleave", () => {
+            pauseButton.style.display = "none";
+        });
+
+        function initGame() {
+            game = new Chess();
+        }
+
+        function setFeedback(text, cls = "") {
+            feedbackEl.textContent = text;
+            feedbackEl.className = cls;
+        }
+
+        // Helper: move rook as well when castling
+        function applyCastlingRook(move) {
+            if (!move || typeof move.flags !== "string" || move.piece !== "k") return;
+
+            if (move.flags.indexOf("k") !== -1) {
+                const rookFrom = move.color === "w" ? "h1" : "h8";
+                const rookTo = move.color === "w" ? "f1" : "f8";
+                board.move(`${rookFrom}-${rookTo}`);
+            } else if (move.flags.indexOf("q") !== -1) {
+                const rookFrom = move.color === "w" ? "a1" : "a8";
+                const rookTo = move.color === "w" ? "d1" : "d8";
+                board.move(`${rookFrom}-${rookTo}`);
+            }
+        }
+
+        function start() {
+            isShowing = false;
+            isPaused = false;
+            openingComplete = false;
+            if (previewTimer) {
+                clearTimeout(previewTimer);
+                previewTimer = null;
+            }
+            if (replyTimer) {
+                clearTimeout(replyTimer);
+                replyTimer = null;
+            }
+
+            boardElement.classList.remove("showing-opening");
+            pauseButton.style.display = "none";
+            pauseButton.textContent = "Pause";
+
+            initGame();
+            moveIndex = 0;
+            currentOpening = openings[select.value] || [];
+            board.position("start");
+            setFeedback("");
+        }
+
+        function reset() {
+            start();
+        }
+
+        function onDrop(source, target) {
+            if (isShowing || openingComplete) return "snapback";
+
+            const move = game.move({
+                from: source,
+                to: target,
+                promotion: "q"
+            });
+
+
+            if (!move) return "snapback";
+
+            const expected = currentOpening[moveIndex];
+
+            if (move.san !== expected) {
+                setFeedback(`Wrong: ${move.san} | expected: ${expected}`, "wrong");
+                game.undo();
+                return "snapback";
+            }
+
+            moveIndex++;
+            setFeedback("Good!", "correct");
+
+            // handle castling rook movement for player's move
+            applyCastlingRook(move);
+
+            if (moveIndex < currentOpening.length) {
+                replyTimer = setTimeout(() => {
+                    const nextMoveSan = currentOpening[moveIndex];
+                    const autoMove = game.move(nextMoveSan);
+                    if (autoMove) {
+                        board.move(`${autoMove.from}-${autoMove.to}`);
+                        applyCastlingRook(autoMove);
+                    } else {
+                        board.position(game.fen());
+                    }
+                    moveIndex++;
+
+                    if (moveIndex >= currentOpening.length) {
+                        openingComplete = true;
+                        setFeedback("Opening complete!", "correct");
+                        setTimeout(() => {
+                            alert("You successfully finished the opening");
+                            reset();
+                        }, 1000);
+                    }
+                }, 300);
+            }
+        }
+
+        function scheduleNextPreviewMove() {
+            if (!isShowing || isPaused) return;
+
+            if (previewIndex >= previewMoves.length) {
+                isShowing = false;
+                isPaused = false;
+                boardElement.classList.remove("showing-opening");
+                pauseButton.style.display = "none";
+                pauseButton.textContent = "Pause";
+                start();
+                return;
+            }
+
+            const san = previewMoves[previewIndex];
+            previewTimer = setTimeout(() => {
+                const move = previewGame.move(san);
+                if (move) {
+                    board.move(`${move.from}-${move.to}`);
+                    applyCastlingRook(move);
+                } else {
+                    board.position(previewGame.fen());
+                }
+                previewIndex++;
+                scheduleNextPreviewMove();
+            }, STEP_DELAY_MS);
+        }
+
+        function showOpening() {
+            if (isShowing) return;
+
+            isShowing = true;
+            isPaused = false;
+            boardElement.classList.add("showing-opening");
+            pauseButton.style.display = "inline-block";
+            pauseButton.textContent = "Pause";
+
+            previewGame = new Chess();
+            previewMoves = openings[select.value] || [];
+            previewIndex = 0;
+
+            board.position("start");
+            previewGame.reset();
+            setFeedback("");
+
+            if (!previewMoves.length) {
+                isShowing = false;
+                boardElement.classList.remove("showing-opening");
+                pauseButton.style.display = "none";
+                return;
+            }
+
+            scheduleNextPreviewMove();
+        }
+
+        function togglePause() {
+            if (!isShowing) return;
+
+            if (!isPaused) {
+                isPaused = true;
+                if (previewTimer) {
+                    clearTimeout(previewTimer);
+                    previewTimer = null;
+                }
+                pauseButton.textContent = "Pause";
+            } else {
+                isPaused = false;
+                pauseButton.textContent = "Pause";
+                scheduleNextPreviewMove();
+            }
+        }
+
+        board = Chessboard("board", {
+            draggable: true,
+            position: "start",
+            onDrop: onDrop,
+            pieceTheme: "assets/chesspieces/wikipedia/{piece}.png"
+        });
+
+        start();
+    </script>
+
+</body>
+
+</html>
+
