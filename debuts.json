@@ -1,0 +1,21 @@
+{
+  "Caro-Kann": [
+    "e4", "c6",
+    "d4", "d5",
+    "Nc3", "dxe4",
+    "Nxe4", "Bf5",
+    "Ng3", "Bg6",
+    "Nf3", "Nd7",
+    "Be2", "e6",
+    "O-O", "Ngf6"
+  ],
+  "Scandinavian": [
+    "e4", "d5",
+    "exd5", "Qxd5",
+    "Nc3", "Qa5",
+    "d4", "Nf6",
+    "Nf3", "c6",
+    "Bc4", "Bf5",
+    "O-O", "e6"
+  ]
+}

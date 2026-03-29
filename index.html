@@ -83,30 +83,19 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/chessboard-js/1.0.0/chessboard-1.0.0.min.js"></script>
 
     <script>
-        const openings = {
-            "Caro-Kann": [
-                "e4", "c6",
-                "d4", "d5",
-                "Nc3", "dxe4",
-                "Nxe4", "Bf5",
-                "Ng3", "Bg6",
-                "Nf3", "Nd7",
-                "Be2", "e6",
-                "O-O", "Ngf6"
-            ],
-            "Scandinavian": [
-                "e4", "d5",
-                "exd5", "Qxd5",
-                "Nc3", "Qa5",
-                "d4", "Nf6",
-                "Nf3", "c6",
-                "Bc4", "Bf5",
-                "O-O", "e6"
-            ]
-        };
+        let openings = {};
+        let board;
+
+        // Load openings from JSON file
+        fetch('debuts.json')
+            .then(response => response.json())
+            .then(data => {
+                openings = data;
+                initializeGame();
+            })
+            .catch(error => console.error('Error loading debuts.json:', error));
 
         let game;
-        let board;
         let moveIndex = 0;
         let currentOpening = [];
         let isShowing = false;
@@ -126,12 +115,27 @@
         const pauseButton = document.getElementById("pauseButton");
         const feedbackEl = document.getElementById("feedback");
 
-        Object.keys(openings).forEach(name => {
-            const opt = document.createElement("option");
-            opt.value = name;
-            opt.textContent = name;
-            select.appendChild(opt);
-        });
+        function initializeGame() {
+            // Populate select dropdown
+            select.innerHTML = ""; // Clear existing options
+            Object.keys(openings).forEach(name => {
+                const opt = document.createElement("option");
+                opt.value = name;
+                opt.textContent = name;
+                select.appendChild(opt);
+            });
+
+            // Initialize chessboard
+            board = Chessboard("board", {
+                draggable: true,
+                position: "start",
+                onDrop: onDrop,
+                pieceTheme: "assets/chesspieces/wikipedia/{piece}.png"
+            });
+
+            // Start the game
+            start();
+        }
 
         select.addEventListener("change", start);
         resetButton.addEventListener("click", reset);
@@ -320,15 +324,6 @@
                 scheduleNextPreviewMove();
             }
         }
-
-        board = Chessboard("board", {
-            draggable: true,
-            position: "start",
-            onDrop: onDrop,
-            pieceTheme: "assets/chesspieces/wikipedia/{piece}.png"
-        });
-
-        start();
     </script>
 
 </body>
