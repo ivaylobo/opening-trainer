@@ -1,83 +1,138 @@
 {
-  "Caro-Kann-1": [
-    "e4", "c6",
-    "d4", "d5",
-    "Nc3", "dxe4",
-    "Nxe4", "Bf5",
-    "Ng3", "Bg6",
-    "Nf3", "Nd7",
-    "Be2", "e6",
-    "O-O", "Ngf6"
-  ],
+  "white": {
+    "Caro-Kann-1": [
+      "e4", "c6",
+      "d4", "d5",
+      "Nc3", "dxe4",
+      "Nxe4", "Bf5",
+      "Ng3", "Bg6",
+      "Nf3", "Nd7",
+      "Be2", "e6",
+      "O-O", "Ngf6"
+    ],
+    "Caro-Kann-2 (Advance)": [
+      "e4", "c6",
+      "d4", "d5",
+      "e5", "Bf5",
+      "Nc3", "e6",
+      "Nf3", "Nd7",
+      "Be2", "Ne7",
+      "O-O", "c5"
+    ],
+    "Caro-Kann-3": [
+      "e4", "c6",
+      "d4", "d5",
+      "exd5", "cxd5",
+      "Bd3", "Nc6",
+      "c3", "Nf6",
+      "Bf4", "Bg4",
+      "Ne2", "e6",
+      "Nd2", "Bd6"
+    ],
+    "Caro-Kann-4 (Fantasy attempt)": [
+      "e4", "c6",
+      "d4", "d5",
+      "f3", "dxe4",
+      "Nc3", "exf3",
+      "Nxf3", "Nf6",
+      "Bd3", "Bg4",
+      "O-O", "e6"
+    ],
+    "Scandinavian-1": [
+      "e4", "d5",
+      "exd5", "Qxd5",
+      "Nc3", "Qa5",
+      "d4", "Nf6",
+      "Nf3", "c6",
+      "Bc4", "Bf5",
+      "O-O", "e6"
+    ],
+    "Scandinavian-2 (Qd8 safe)": [
+      "e4", "d5",
+      "exd5", "Qxd5",
+      "Nc3", "Qd8",
+      "d4", "Nf6",
+      "Nf3", "c6",
+      "Bc4", "Bf5",
+      "O-O", "e6"
+    ],
+    "Scandinavian-3 (Modern ...Qd6)": [
+      "e4", "d5",
+      "exd5", "Qxd5",
+      "Nc3", "Qd6",
+      "d4", "Nf6",
+      "Nf3", "c6",
+      "Bc4", "Bf5",
+      "O-O", "e6"
+    ],
+    "Scandinavian-4 (Early ...Nf6)": [
+      "e4", "d5",
+      "exd5", "Nf6",
+      "d4", "Nxd5",
+      "Nf3", "Bg4",
+      "Be2", "e6",
+      "O-O", "Be7",
+      "c4", "Nb6"
+    ]
+  },
+  "black": {
+    "Caro-Kann-1 (Main)": [
+      "e4", "c6",
+      "d4", "d5",
+      "Nc3", "dxe4",
+      "Nxe4", "Bf5",
+      "Ng3", "Bg6",
+      "Nf3", "Nd7",
+      "Be2", "e6",
+      "O-O", "Ngf6"
+    ],
 
-  "Caro-Kann-2 (Advance)": [
-    "e4", "c6",
-    "d4", "d5",
-    "e5", "Bf5",
-    "Nc3", "e6",
-    "Nf3", "Nd7",
-    "Be2", "Ne7",
-    "O-O", "c5"
-  ],
+    "Caro-Kann-2 (Advance)": [
+      "e4", "c6",
+      "d4", "d5",
+      "e5", "Bf5",
+      "Nc3", "e6",
+      "Nf3", "Nd7",
+      "Be2", "Ne7",
+      "O-O", "c5"
+    ],
 
-  "Caro-Kann-3": [
-    "e4", "c6",
-    "d4", "d5",
-    "exd5", "cxd5",
-    "Bd3", "Nc6",
-    "c3", "Nf6",
-    "Bf4", "Bg4",
-    "Ne2", "e6",
-    "Nd2", "Bd6"
-  ],
+    "Caro-Kann-3 (Exchange)": [
+      "e4", "c6",
+      "d4", "d5",
+      "exd5", "cxd5",
+      "Bd3", "Nc6",
+      "c3", "Nf6",
+      "Bf4", "Bg4",
+      "Ne2", "e6",
+      "Nd2", "Bd6"
+    ],
 
-  "Caro-Kann-4 (Fantasy attempt)": [
-    "e4", "c6",
-    "d4", "d5",
-    "f3", "dxe4",
-    "Nc3", "exf3",
-    "Nxf3", "Nf6",
-    "Bd3", "Bg4",
-    "O-O", "e6"
-  ],
+    "d4-System-1 (Classical setup)": [
+      "d4", "d5",
+      "c4", "e6",
+      "Nc3", "Nf6",
+      "Nf3", "Be7",
+      "Bg5", "O-O",
+      "e3", "Nbd7"
+    ],
 
-  "Scandinavian-1": [
-    "e4", "d5",
-    "exd5", "Qxd5",
-    "Nc3", "Qa5",
-    "d4", "Nf6",
-    "Nf3", "c6",
-    "Bc4", "Bf5",
-    "O-O", "e6"
-  ],
+    "d4-System-2 (Simple solid)": [
+      "d4", "d5",
+      "Nf3", "Nf6",
+      "c4", "e6",
+      "Nc3", "Be7",
+      "Bg5", "O-O",
+      "e3", "h6"
+    ],
 
-  "Scandinavian-2 (Qd8 safe)": [
-    "e4", "d5",
-    "exd5", "Qxd5",
-    "Nc3", "Qd8",
-    "d4", "Nf6",
-    "Nf3", "c6",
-    "Bc4", "Bf5",
-    "O-O", "e6"
-  ],
-
-  "Scandinavian-3 (Modern ...Qd6)": [
-    "e4", "d5",
-    "exd5", "Qxd5",
-    "Nc3", "Qd6",
-    "d4", "Nf6",
-    "Nf3", "c6",
-    "Bc4", "Bf5",
-    "O-O", "e6"
-  ],
-
-  "Scandinavian-4 (Early ...Nf6)": [
-    "e4", "d5",
-    "exd5", "Nf6",
-    "d4", "Nxd5",
-    "Nf3", "Bg4",
-    "Be2", "e6",
-    "O-O", "Be7",
-    "c4", "Nb6"
-  ]
+    "d4-System-3 (vs London)": [
+      "d4", "d5",
+      "Bf4", "Nf6",
+      "e3", "c5",
+      "c3", "Nc6",
+      "Nd2", "Bf5",
+      "Ngf3", "e6"
+    ]
+  }
 }

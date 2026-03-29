@@ -60,6 +60,22 @@
             display: none;
         }
 
+        #sideToggle {
+            min-width: 120px;
+            font-weight: 700;
+        }
+
+        #sideToggle.white {
+            background: #f3f3f3;
+            color: #111;
+        }
+
+        #sideToggle.black {
+            background: #111;
+            color: #fff;
+            border: 1px solid #666;
+        }
+
         select,
         button {
             padding: 10px;
@@ -72,7 +88,7 @@
 
         #feedback {
             margin-top: 16px;
-            min-height: 24px;
+            min-height: 48px;
             font-size: 18px;
         }
 
@@ -113,6 +129,7 @@
         <h2>Opening Trainer</h2>
 
     <div class="controls">
+        <button id="sideToggle" class="white" type="button">White</button>
         <select id="openingSelect"></select>
         <button id="resetButton">Restart</button>
         <button id="showButton">Show</button>
@@ -132,14 +149,17 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/chessboard-js/1.0.0/chessboard-1.0.0.min.js"></script>
 
     <script>
-        let openings = {};
+        let openings = {
+            white: {},
+            black: {}
+        };
         let board;
 
         // Load openings from JSON file
         fetch('debuts.json')
             .then(response => response.json())
             .then(data => {
-                openings = data;
+                openings = normalizeOpenings(data);
                 initializeGame();
             })
             .catch(error => console.error('Error loading debuts.json:', error));
@@ -155,8 +175,14 @@
         let previewTimer = null;
         let replyTimer = null;
         let openingComplete = false;
+        let currentSide = "white";
+        const selectedOpeningBySide = {
+            white: "",
+            black: ""
+        };
         const STEP_DELAY_MS = 2000;
 
+        const sideToggleButton = document.getElementById("sideToggle");
         const select = document.getElementById("openingSelect");
         const boardElement = document.getElementById("board");
         const boardContainer = document.getElementById("board-container");
@@ -165,14 +191,69 @@
         const pauseButton = document.getElementById("pauseButton");
         const feedbackEl = document.getElementById("feedback");
 
+        function normalizeOpenings(data) {
+            const hasSideBuckets = data && typeof data === "object" && !Array.isArray(data) && ("white" in data || "black" in data);
+
+            if (hasSideBuckets) {
+                return {
+                    white: data.white || {},
+                    black: data.black || {}
+                };
+            }
+
+            return {
+                white: data || {},
+                black: {}
+            };
+        }
+
+        function getSideOpenings() {
+            return openings[currentSide] || {};
+        }
+
+        function getPlayerColor() {
+            return currentSide === "white" ? "w" : "b";
+        }
+
+        function updateSideToggle() {
+            sideToggleButton.textContent = currentSide === "white" ? "White" : "Black";
+            sideToggleButton.className = currentSide;
+            sideToggleButton.setAttribute("aria-label", `Current repertoire: ${currentSide}`);
+        }
+
+        function populateOpeningSelect() {
+            const sideOpenings = getSideOpenings();
+            const openingNames = Object.keys(sideOpenings);
+            const previousSelection = selectedOpeningBySide[currentSide];
+
+            select.innerHTML = "";
+
+            openingNames.forEach(name => {
+                const opt = document.createElement("option");
+                opt.value = name;
+                opt.textContent = name;
+                select.appendChild(opt);
+            });
+
+            if (!openingNames.length) {
+                selectedOpeningBySide[currentSide] = "";
+                return;
+            }
+
+            const nextSelection = sideOpenings[previousSelection] ? previousSelection : openingNames[0];
+            select.value = nextSelection;
+            selectedOpeningBySide[currentSide] = nextSelection;
+        }
+
         function syncBoardSize() {
             const isMobile = window.innerWidth < 768;
             const topOffset = boardContainer.getBoundingClientRect().top;
             const horizontalPadding = isMobile ? 24 : 48;
-            const verticalPadding = isMobile ? 20 : 24;
+            const verticalPadding = isMobile ? 20 : 28;
+            const reservedFeedbackSpace = isMobile ? 88 : 96;
             const maxWidth = Math.max(180, window.innerWidth - horizontalPadding);
-            const maxHeight = Math.max(180, window.innerHeight - topOffset - verticalPadding);
-            const boardSize = Math.min(maxWidth, maxHeight, 1000);
+            const maxHeight = Math.max(180, window.innerHeight - topOffset - reservedFeedbackSpace - verticalPadding);
+            const boardSize = Math.min(maxWidth, maxHeight, 920);
 
             boardContainer.style.width = `${Math.floor(boardSize)}px`;
 
@@ -181,20 +262,77 @@
             }
         }
 
+        function clearPendingTimers() {
+            if (previewTimer) {
+                clearTimeout(previewTimer);
+                previewTimer = null;
+            }
+
+            if (replyTimer) {
+                clearTimeout(replyTimer);
+                replyTimer = null;
+            }
+        }
+
+        function renderMove(move, chessInstance) {
+            if (move) {
+                board.move(`${move.from}-${move.to}`);
+                applyCastlingRook(move);
+                return;
+            }
+
+            board.position(chessInstance.fen());
+        }
+
+        function finishOpening() {
+            if (openingComplete) return;
+
+            openingComplete = true;
+            setFeedback("Opening complete!", "correct");
+
+            setTimeout(() => {
+                alert("You successfully finished the opening");
+                reset();
+            }, 1000);
+        }
+
+        function playOpponentMove(delayMs = 0) {
+            if (isShowing || openingComplete || moveIndex >= currentOpening.length || game.turn() === getPlayerColor()) {
+                return;
+            }
+
+            const runMove = () => {
+                const nextMoveSan = currentOpening[moveIndex];
+                const autoMove = game.move(nextMoveSan);
+
+                renderMove(autoMove, game);
+                moveIndex++;
+
+                if (moveIndex >= currentOpening.length) {
+                    finishOpening();
+                }
+            };
+
+            if (delayMs > 0) {
+                replyTimer = setTimeout(() => {
+                    replyTimer = null;
+                    runMove();
+                }, delayMs);
+                return;
+            }
+
+            runMove();
+        }
+
         function initializeGame() {
-            // Populate select dropdown
-            select.innerHTML = ""; // Clear existing options
-            Object.keys(openings).forEach(name => {
-                const opt = document.createElement("option");
-                opt.value = name;
-                opt.textContent = name;
-                select.appendChild(opt);
-            });
+            updateSideToggle();
+            populateOpeningSelect();
 
             // Initialize chessboard
             board = Chessboard("board", {
                 draggable: true,
                 position: "start",
+                orientation: currentSide,
                 onDrop: onDrop,
                 pieceTheme: "assets/chesspieces/wikipedia/{piece}.png"
             });
@@ -204,7 +342,16 @@
             syncBoardSize();
         }
 
-        select.addEventListener("change", start);
+        sideToggleButton.addEventListener("click", () => {
+            currentSide = currentSide === "white" ? "black" : "white";
+            updateSideToggle();
+            populateOpeningSelect();
+            start();
+        });
+        select.addEventListener("change", () => {
+            selectedOpeningBySide[currentSide] = select.value;
+            start();
+        });
         resetButton.addEventListener("click", reset);
         showButton.addEventListener("click", showOpening);
         pauseButton.addEventListener("click", togglePause);
@@ -238,14 +385,7 @@
             isShowing = false;
             isPaused = false;
             openingComplete = false;
-            if (previewTimer) {
-                clearTimeout(previewTimer);
-                previewTimer = null;
-            }
-            if (replyTimer) {
-                clearTimeout(replyTimer);
-                replyTimer = null;
-            }
+            clearPendingTimers();
 
             boardElement.classList.remove("showing-opening");
             pauseButton.style.display = "none";
@@ -253,9 +393,17 @@
 
             initGame();
             moveIndex = 0;
-            currentOpening = openings[select.value] || [];
+            currentOpening = getSideOpenings()[select.value] || [];
+            board.orientation(currentSide);
             board.position("start");
             setFeedback("");
+
+            if (!currentOpening.length) {
+                setFeedback("No openings available for this side.", "wrong");
+                return;
+            }
+
+            playOpponentMove();
         }
 
         function reset() {
@@ -288,27 +436,13 @@
             // handle castling rook movement for player's move
             applyCastlingRook(move);
 
-            if (moveIndex < currentOpening.length) {
-                replyTimer = setTimeout(() => {
-                    const nextMoveSan = currentOpening[moveIndex];
-                    const autoMove = game.move(nextMoveSan);
-                    if (autoMove) {
-                        board.move(`${autoMove.from}-${autoMove.to}`);
-                        applyCastlingRook(autoMove);
-                    } else {
-                        board.position(game.fen());
-                    }
-                    moveIndex++;
+            if (moveIndex >= currentOpening.length) {
+                finishOpening();
+                return;
+            }
 
-                    if (moveIndex >= currentOpening.length) {
-                        openingComplete = true;
-                        setFeedback("Opening complete!", "correct");
-                        setTimeout(() => {
-                            alert("You successfully finished the opening");
-                            reset();
-                        }, 1000);
-                    }
-                }, 300);
+            if (game.turn() !== getPlayerColor()) {
+                playOpponentMove(300);
             }
         }
 
@@ -349,9 +483,10 @@
             pauseButton.textContent = "Pause";
 
             previewGame = new Chess();
-            previewMoves = openings[select.value] || [];
+            previewMoves = getSideOpenings()[select.value] || [];
             previewIndex = 0;
 
+            board.orientation(currentSide);
             board.position("start");
             previewGame.reset();
             setFeedback("");
