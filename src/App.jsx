@@ -57,6 +57,8 @@ function App() {
   const previewTimerRef = useRef(null)
   const replyTimerRef = useRef(null)
   const resetRef = useRef(() => {})
+  const boardPixelSizeRef = useRef(0)
+  const viewportWidthRef = useRef(0)
 
   useEffect(() => {
     openingsRef.current = openings
@@ -352,19 +354,31 @@ function App() {
     if (!container) return
 
     const isMobile = window.innerWidth < 768
-    const topOffset = container.getBoundingClientRect().top
-    const horizontalPadding = isMobile ? 24 : 48
-    const verticalPadding = isMobile ? 20 : 28
-    const reservedFeedbackSpace = isMobile ? 88 : 96
-    const maxWidth = Math.max(180, window.innerWidth - horizontalPadding)
-    const maxHeight = Math.max(180, window.innerHeight - topOffset - reservedFeedbackSpace - verticalPadding)
-    const boardSize = Math.min(maxWidth, maxHeight, 920)
+    let nextBoardSize = 0
 
-    container.style.width = `${Math.floor(boardSize)}px`
+    if (isMobile) {
+      container.style.width = '100%'
+      nextBoardSize = Math.floor(container.getBoundingClientRect().width)
+    } else {
+      const topOffset = container.getBoundingClientRect().top
+      const horizontalPadding = 48
+      const verticalPadding = 28
+      const reservedFeedbackSpace = 96
+      const maxWidth = Math.max(180, window.innerWidth - horizontalPadding)
+      const maxHeight = Math.max(
+        180,
+        window.innerHeight - topOffset - reservedFeedbackSpace - verticalPadding,
+      )
+      const boardSize = Math.min(maxWidth, maxHeight, 920)
 
-    if (board) {
-      board.resize()
+      container.style.width = `${Math.floor(boardSize)}px`
+      nextBoardSize = Math.floor(boardSize)
     }
+
+    if (!board || nextBoardSize <= 0 || boardPixelSizeRef.current === nextBoardSize) return
+
+    boardPixelSizeRef.current = nextBoardSize
+    board.resize()
   }, [])
 
   const openingNames = useMemo(() => {
@@ -432,9 +446,23 @@ function App() {
     if (!isBoardReady) return
 
     syncBoardSize()
-    window.addEventListener('resize', syncBoardSize)
+    viewportWidthRef.current = window.innerWidth
 
-    return () => window.removeEventListener('resize', syncBoardSize)
+    const handleResize = () => {
+      const nextViewportWidth = window.innerWidth
+      const isMobile = nextViewportWidth < 768
+
+      if (isMobile && nextViewportWidth === viewportWidthRef.current) {
+        return
+      }
+
+      viewportWidthRef.current = nextViewportWidth
+      syncBoardSize()
+    }
+
+    window.addEventListener('resize', handleResize)
+
+    return () => window.removeEventListener('resize', handleResize)
   }, [isBoardReady, syncBoardSize])
 
   useEffect(() => {
