@@ -26,6 +26,10 @@
     width: 100%;
     padding: 0;
   }
+
+  .board {
+    touch-action: none;
+  }
 }
 
 @keyframes boardRise {

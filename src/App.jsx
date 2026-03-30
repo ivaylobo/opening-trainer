@@ -22,6 +22,15 @@ const normalizeOpenings = (data) => {
   }
 }
 
+const isTouchLikeDevice = () => {
+  if (typeof window === 'undefined' || typeof navigator === 'undefined') return false
+
+  const coarsePointer =
+    typeof window.matchMedia === 'function' && window.matchMedia('(pointer: coarse)').matches
+
+  return coarsePointer || navigator.maxTouchPoints > 0 || 'ontouchstart' in window
+}
+
 function App() {
   const [openings, setOpenings] = useState({ white: {}, black: {} })
   const [openingsLoaded, setOpeningsLoaded] = useState(false)
@@ -59,6 +68,14 @@ function App() {
   const resetRef = useRef(() => {})
   const boardPixelSizeRef = useRef(0)
   const viewportWidthRef = useRef(0)
+  const touchDragRef = useRef({
+    active: false,
+    sourceSquare: '',
+    pieceEl: null,
+    ghostEl: null,
+    ghostWidth: 0,
+    ghostHeight: 0,
+  })
 
   useEffect(() => {
     openingsRef.current = openings
@@ -306,8 +323,8 @@ function App() {
     scheduleNextPreviewMove()
   }, [scheduleNextPreviewMove, setPaused])
 
-  const onDrop = useCallback(
-    (source, target) => {
+  const attemptPlayerMove = useCallback(
+    (source, target, { applyMoveOnBoard = false } = {}) => {
       if (isShowingRef.current || openingCompleteRef.current) return 'snapback'
 
       const game = gameRef.current
@@ -331,20 +348,176 @@ function App() {
 
       moveIndexRef.current += 1
       setFeedback('Good!', 'correct')
-      applyCastlingRook(move)
+
+      if (applyMoveOnBoard) {
+        const board = boardInstanceRef.current
+        if (board) {
+          board.position(game.fen(), false)
+        }
+      } else {
+        applyCastlingRook(move)
+      }
 
       if (moveIndexRef.current >= currentOpeningRef.current.length) {
         finishOpening()
-        return undefined
+        return 'ok'
       }
 
       if (game.turn() !== getPlayerColor()) {
         playOpponentMove(300)
       }
 
-      return undefined
+      return 'ok'
     },
     [applyCastlingRook, finishOpening, getPlayerColor, playOpponentMove, setFeedback],
+  )
+
+  const clearTouchDrag = useCallback(() => {
+    const dragState = touchDragRef.current
+
+    if (dragState.pieceEl) {
+      dragState.pieceEl.style.opacity = ''
+    }
+
+    if (dragState.ghostEl) {
+      dragState.ghostEl.remove()
+    }
+
+    touchDragRef.current = {
+      active: false,
+      sourceSquare: '',
+      pieceEl: null,
+      ghostEl: null,
+      ghostWidth: 0,
+      ghostHeight: 0,
+    }
+  }, [])
+
+  const onTouchStartBoard = useCallback(
+    (event) => {
+      if (!isTouchLikeDevice()) return
+      if (isShowingRef.current || openingCompleteRef.current) return
+
+      const target = event.target
+      if (!(target instanceof Element)) return
+
+      const pieceEl = target.closest('[class*="piece-"]')
+      if (!(pieceEl instanceof HTMLElement)) return
+
+      const squareEl = pieceEl.closest('[data-square]')
+      if (!(squareEl instanceof HTMLElement)) return
+
+      const sourceSquare = squareEl.getAttribute('data-square')
+      if (!sourceSquare) return
+
+      const touch = event.changedTouches[0]
+      if (!touch) return
+
+      clearTouchDrag()
+
+      const pieceRect = pieceEl.getBoundingClientRect()
+      const ghostEl = pieceEl.cloneNode(true)
+      if (!(ghostEl instanceof HTMLElement)) return
+
+      ghostEl.style.position = 'fixed'
+      ghostEl.style.left = '0'
+      ghostEl.style.top = '0'
+      ghostEl.style.width = `${pieceRect.width}px`
+      ghostEl.style.height = `${pieceRect.height}px`
+      ghostEl.style.pointerEvents = 'none'
+      ghostEl.style.zIndex = '9999'
+      ghostEl.style.opacity = '0.92'
+      ghostEl.style.transform = `translate(${touch.clientX - pieceRect.width / 2}px, ${
+        touch.clientY - pieceRect.height / 2
+      }px)`
+      document.body.appendChild(ghostEl)
+
+      pieceEl.style.opacity = '0'
+
+      touchDragRef.current = {
+        active: true,
+        sourceSquare,
+        pieceEl,
+        ghostEl,
+        ghostWidth: pieceRect.width,
+        ghostHeight: pieceRect.height,
+      }
+
+      event.preventDefault()
+    },
+    [clearTouchDrag],
+  )
+
+  const onTouchMoveBoard = useCallback((event) => {
+    const dragState = touchDragRef.current
+    if (!dragState.active || !dragState.ghostEl) return
+
+    const touch = event.changedTouches[0]
+    if (!touch) return
+
+    dragState.ghostEl.style.transform = `translate(${touch.clientX - dragState.ghostWidth / 2}px, ${
+      touch.clientY - dragState.ghostHeight / 2
+    }px)`
+
+    event.preventDefault()
+  }, [])
+
+  const onTouchEndBoard = useCallback(
+    (event) => {
+      const dragState = touchDragRef.current
+      if (!dragState.active) return
+
+      const touch = event.changedTouches[0]
+      const sourceSquare = dragState.sourceSquare
+      let targetSquare = ''
+
+      if (touch) {
+        const dropTarget = document.elementFromPoint(touch.clientX, touch.clientY)
+        if (dropTarget instanceof Element) {
+          const targetSquareEl = dropTarget.closest('[data-square]')
+          targetSquare = targetSquareEl?.getAttribute('data-square') || ''
+        }
+      }
+
+      if (!sourceSquare || !targetSquare) {
+        clearTouchDrag()
+        event.preventDefault()
+        return
+      }
+
+      const result = attemptPlayerMove(sourceSquare, targetSquare, {
+        applyMoveOnBoard: true,
+      })
+
+      if (result === 'snapback') {
+        const board = boardInstanceRef.current
+        const game = gameRef.current
+        if (board && game) {
+          board.position(game.fen(), false)
+        }
+      }
+
+      clearTouchDrag()
+      event.preventDefault()
+    },
+    [attemptPlayerMove, clearTouchDrag],
+  )
+
+  const onTouchCancelBoard = useCallback(
+    (event) => {
+      if (!touchDragRef.current.active) return
+      clearTouchDrag()
+      event.preventDefault()
+    },
+    [clearTouchDrag],
+  )
+
+  const onDrop = useCallback(
+    (source, target) => {
+      const result = attemptPlayerMove(source, target)
+      return result === 'snapback' ? 'snapback' : undefined
+    },
+    [attemptPlayerMove],
   )
 
   const syncBoardSize = useCallback(() => {
@@ -429,9 +602,10 @@ function App() {
 
     const Chessboard = window.Chessboard
     if (!Chessboard) return
+    const touchDevice = isTouchLikeDevice()
 
     boardInstanceRef.current = Chessboard(boardRef.current, {
-      draggable: true,
+      draggable: !touchDevice,
       position: 'start',
       orientation: currentSideRef.current,
       onDrop,
@@ -464,6 +638,32 @@ function App() {
 
     return () => window.removeEventListener('resize', handleResize)
   }, [isBoardReady, syncBoardSize])
+
+  useEffect(() => {
+    if (!isBoardReady || !isTouchLikeDevice() || !boardRef.current) return
+
+    const boardElement = boardRef.current
+
+    boardElement.addEventListener('touchstart', onTouchStartBoard, { passive: false })
+    window.addEventListener('touchmove', onTouchMoveBoard, { passive: false })
+    window.addEventListener('touchend', onTouchEndBoard, { passive: false })
+    window.addEventListener('touchcancel', onTouchCancelBoard, { passive: false })
+
+    return () => {
+      boardElement.removeEventListener('touchstart', onTouchStartBoard)
+      window.removeEventListener('touchmove', onTouchMoveBoard)
+      window.removeEventListener('touchend', onTouchEndBoard)
+      window.removeEventListener('touchcancel', onTouchCancelBoard)
+      clearTouchDrag()
+    }
+  }, [
+    clearTouchDrag,
+    isBoardReady,
+    onTouchCancelBoard,
+    onTouchEndBoard,
+    onTouchMoveBoard,
+    onTouchStartBoard,
+  ])
 
   useEffect(() => {
     if (!isBoardReady) return
