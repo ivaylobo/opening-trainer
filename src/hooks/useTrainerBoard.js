@@ -4,6 +4,7 @@ import {
   selectCurrentSide,
   selectCurrentOpening,
   selectFeedback,
+  selectOpeningGroups,
   selectOpeningNames,
   selectIsBoardReady,
   selectIsPaused,
@@ -36,6 +37,7 @@ export default function useTrainerBoard() {
   const currentSide = useSelector(selectCurrentSide)
   const selectedOpeningBySide = useSelector(selectSelectedOpeningBySide)
   const selectedOpening = useSelector(selectSelectedOpening)
+  const openingGroups = useSelector(selectOpeningGroups)
   const openingNames = useSelector(selectOpeningNames)
   const feedback = useSelector(selectFeedback)
   const isShowing = useSelector(selectIsShowing)
@@ -174,8 +176,25 @@ export default function useTrainerBoard() {
     }
   }, [])
 
-  const getSideOpenings = useCallback(() => {
-    return openingsRef.current[currentSideRef.current] || {}
+  const getSelectedOpeningMoves = useCallback((side) => {
+    const resolvedSide = side || currentSideRef.current
+    const sideOpenings = openingsRef.current[resolvedSide] || {}
+    const selection = selectedOpeningBySideRef.current[resolvedSide] || {
+      opening: '',
+      variation: 0,
+    }
+    const variations = Array.isArray(sideOpenings[selection.opening])
+      ? sideOpenings[selection.opening]
+      : []
+    const variationIndex =
+      Number.isInteger(selection.variation) &&
+      selection.variation >= 0 &&
+      selection.variation < variations.length
+        ? selection.variation
+        : 0
+    const selectedVariation = variations[variationIndex]
+
+    return Array.isArray(selectedVariation?.moves) ? selectedVariation.moves : []
   }, [])
 
   const getPlayerColor = useCallback(() => {
@@ -292,8 +311,7 @@ export default function useTrainerBoard() {
     const Chess = window.Chess
     if (!board || !Chess) return
 
-    const selectedOpeningName = selectedOpeningBySideRef.current[currentSideRef.current]
-    const nextOpening = getSideOpenings()[selectedOpeningName] || []
+    const nextOpening = getSelectedOpeningMoves(currentSideRef.current)
 
     gameRef.current = new Chess()
     startSessionRuntime(nextOpening)
@@ -307,7 +325,13 @@ export default function useTrainerBoard() {
     }
 
     playOpponentMove()
-  }, [clearTouchDrag, getSideOpenings, playOpponentMove, setFeedbackState, startSessionRuntime])
+  }, [
+    clearTouchDrag,
+    getSelectedOpeningMoves,
+    playOpponentMove,
+    setFeedbackState,
+    startSessionRuntime,
+  ])
 
   useEffect(() => {
     startRef.current = startStable
@@ -365,8 +389,7 @@ export default function useTrainerBoard() {
     setPausedState(false)
 
     previewGameRef.current = new Chess()
-    previewMovesRef.current =
-      getSideOpenings()[selectedOpeningBySideRef.current[currentSideRef.current]] || []
+    previewMovesRef.current = getSelectedOpeningMoves(currentSideRef.current)
     previewIndexRef.current = 0
 
     board.orientation(currentSideRef.current)
@@ -381,7 +404,7 @@ export default function useTrainerBoard() {
     }
 
     scheduleNextPreviewMoveRef.current()
-  }, [getSideOpenings, setFeedbackState, setPausedState, setShowingState])
+  }, [getSelectedOpeningMoves, setFeedbackState, setPausedState, setShowingState])
 
   const togglePausePreview = useCallback(() => {
     if (!isShowingRef.current) return
@@ -677,7 +700,7 @@ export default function useTrainerBoard() {
   useEffect(() => {
     if (!isBoardReady) return
     startRef.current()
-  }, [currentSide, isBoardReady, selectedOpening])
+  }, [currentSide, isBoardReady, selectedOpening?.opening, selectedOpening?.variation])
 
   useEffect(() => {
     return () => {
@@ -695,24 +718,55 @@ export default function useTrainerBoard() {
       dispatch(
         setSelectedOpening({
           side: currentSideRef.current,
-          value,
+          opening: value,
+          variation: 0,
         }),
       )
     },
     [dispatch],
   )
 
+  const handleVariationChange = useCallback(
+    (value) => {
+      dispatch(
+        setSelectedOpening({
+          side: currentSideRef.current,
+          opening: selectedOpeningBySideRef.current[currentSideRef.current]?.opening || '',
+          variation: Number(value) || 0,
+        }),
+      )
+    },
+    [dispatch],
+  )
+
+  const selectedOpeningName = selectedOpening?.opening || ''
+  const selectedVariations = Array.isArray(openingGroups[selectedOpeningName])
+    ? openingGroups[selectedOpeningName]
+    : []
+  const variationOptions = selectedVariations.map((variation, index) => ({
+    value: String(index),
+    label:
+      typeof variation?.name === 'string' && variation.name.trim()
+        ? variation.name
+        : `variation ${index + 1}`,
+  }))
+  const showVariationSelect = selectedVariations.length > 1
+
   return {
     boardRef,
     boardContainerRef,
     currentSide,
     openingNames,
-    selectedOpening,
+    selectedOpening: selectedOpeningName,
+    selectedVariation: String(selectedOpening?.variation || 0),
+    variationOptions,
+    showVariationSelect,
     feedback,
     isShowing,
     isPaused,
     onSideToggle: handleSideToggle,
     onSelectChange: handleSelectChange,
+    onVariationChange: handleVariationChange,
     onReset: reset,
     onShow: showOpening,
     onPause: togglePausePreview,

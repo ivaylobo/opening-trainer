@@ -7,6 +7,15 @@ export default function Select({
   className = '',
   ...props
 }) {
+  const normalizedOptions = options.map((option) =>
+    typeof option === 'string'
+      ? { value: option, label: option }
+      : {
+          value: String(option.value),
+          label: option.label,
+        },
+  )
+
   return (
     <div className={`${styles.wrapper} ${className}`}>
       <select
@@ -15,9 +24,9 @@ export default function Select({
         onChange={(event) => onChange(event.target.value)}
         {...props}
       >
-        {options.map((option) => (
-          <option key={option} value={option}>
-            {option}
+        {normalizedOptions.map((option) => (
+          <option key={option.value} value={option.value}>
+            {option.label}
           </option>
         ))}
       </select>

@@ -6,8 +6,12 @@ export default function Header({
   currentSide,
   openingNames,
   selectedOpening,
+  selectedVariation,
+  variationOptions,
+  showVariationSelect,
   onSideToggle,
   onSelectChange,
+  onVariationChange,
   onReset,
   onShow,
   onPause,
@@ -30,6 +34,14 @@ export default function Header({
         onChange={onSelectChange}
         aria-label="Select opening"
       />
+      {showVariationSelect ? (
+        <Select
+          options={variationOptions}
+          value={selectedVariation}
+          onChange={onVariationChange}
+          aria-label="Select variation"
+        />
+      ) : null}
       <Button variant="ghost" onClick={onReset}>
         Restart
       </Button>

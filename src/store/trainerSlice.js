@@ -4,7 +4,10 @@ const initialState = {
   openings: { white: {}, black: {} },
   openingsLoaded: false,
   currentSide: 'white',
-  selectedOpeningBySide: { white: '', black: '' },
+  selectedOpeningBySide: {
+    white: { opening: '', variation: 0 },
+    black: { opening: '', variation: 0 },
+  },
   feedback: { text: '', type: '' },
   isShowing: false,
   isPaused: false,
@@ -17,9 +20,24 @@ const initialState = {
 const ensureValidSelection = (state, side) => {
   const sideOpenings = state.openings[side] || {}
   const names = Object.keys(sideOpenings)
-  const selected = state.selectedOpeningBySide[side]
+  const selected = state.selectedOpeningBySide[side] || { opening: '', variation: 0 }
 
-  state.selectedOpeningBySide[side] = names.includes(selected) ? selected : names[0] || ''
+  if (!names.length) {
+    state.selectedOpeningBySide[side] = { opening: '', variation: 0 }
+    return
+  }
+
+  const opening = names.includes(selected.opening) ? selected.opening : names[0]
+  const variations = Array.isArray(sideOpenings[opening]) ? sideOpenings[opening] : []
+  const maxVariation = Math.max(0, variations.length - 1)
+  const variation =
+    Number.isInteger(selected.variation) &&
+    selected.variation >= 0 &&
+    selected.variation <= maxVariation
+      ? selected.variation
+      : 0
+
+  state.selectedOpeningBySide[side] = { opening, variation }
 }
 
 const trainerSlice = createSlice({
@@ -37,9 +55,16 @@ const trainerSlice = createSlice({
       ensureValidSelection(state, state.currentSide)
     },
     setSelectedOpening(state, action) {
-      const { side, value } = action.payload
+      const { side, opening, variation = 0 } = action.payload || {}
       if (!side) return
-      state.selectedOpeningBySide[side] = value
+      const current = state.selectedOpeningBySide[side] || { opening: '', variation: 0 }
+
+      state.selectedOpeningBySide[side] = {
+        opening: typeof opening === 'string' ? opening : current.opening,
+        variation: Number.isInteger(variation) ? variation : current.variation,
+      }
+
+      ensureValidSelection(state, side)
     },
     setFeedback(state, action) {
       const { text = '', type = '' } = action.payload || {}
@@ -107,7 +132,12 @@ export const selectOpeningNames = createSelector(
   (openings, side) => Object.keys(openings[side] || {}),
 )
 
+export const selectOpeningGroups = createSelector(
+  [selectOpenings, selectCurrentSide],
+  (openings, side) => openings[side] || {},
+)
+
 export const selectSelectedOpening = createSelector(
   [selectSelectedOpeningBySide, selectCurrentSide],
-  (selectedBySide, side) => selectedBySide[side] || '',
+  (selectedBySide, side) => selectedBySide[side] || { opening: '', variation: 0 },
 )

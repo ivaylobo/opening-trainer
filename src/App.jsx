@@ -13,11 +13,15 @@ function App() {
     currentSide,
     openingNames,
     selectedOpening,
+    selectedVariation,
+    variationOptions,
+    showVariationSelect,
     feedback,
     isShowing,
     isPaused,
     onSideToggle,
     onSelectChange,
+    onVariationChange,
     onReset,
     onShow,
     onPause,
@@ -30,8 +34,12 @@ function App() {
         currentSide={currentSide}
         openingNames={openingNames}
         selectedOpening={selectedOpening}
+        selectedVariation={selectedVariation}
+        variationOptions={variationOptions}
+        showVariationSelect={showVariationSelect}
         onSideToggle={onSideToggle}
         onSelectChange={onSelectChange}
+        onVariationChange={onVariationChange}
         onReset={onReset}
         onShow={onShow}
         onPause={onPause}
