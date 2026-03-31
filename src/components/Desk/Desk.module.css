@@ -28,8 +28,12 @@
   }
 
   .board {
-    touch-action: none;
+    touch-action: manipulation;
   }
+}
+
+:global(.mobile-selected-square) {
+  box-shadow: inset 0 0 0 4px rgba(229, 180, 92, 0.95);
 }
 
 @keyframes boardRise {
