@@ -56,6 +56,20 @@
           "Ba4", "Nf6",
           "O-O", "Be7"
         ]
+      },
+      {
+        "name": "Exchange Variation",
+        "moves": [
+          "e4","e5","Nf3","Nc6","Bb5","a6",
+          "Bxc6","dxc6","O-O","f6","d4","exd4"
+        ]
+      },
+      {
+        "name": "Closed Ruy Lopez",
+        "moves": [
+          "e4","e5","Nf3","Nc6","Bb5","a6",
+          "Ba4","Nf6","O-O","Be7","Re1","b5","Bb3","d6"
+        ]
       }
     ],
     "Scotch Game": [
@@ -67,6 +81,20 @@
           "d4", "exd4",
           "Nxd4", "Nf6",
           "Nc3", "Bb4"
+        ]
+      },
+      {
+        "name": "Scotch Classical",
+        "moves": [
+          "e4","e5","Nf3","Nc6","d4","exd4",
+          "Nxd4","Bc5","Be3","Qf6","c3","Nge7"
+        ]
+      },
+      {
+        "name": "Scotch Gambit",
+        "moves": [
+          "e4","e5","Nf3","Nc6","d4","exd4",
+          "Bc4","Bc5","c3","Nf6","e5","d5"
         ]
       }
     ],
@@ -80,6 +108,20 @@
           "Bg5", "Be7",
           "e3", "O-O"
         ]
+      },
+      {
+        "name": "QGA (Accepted)",
+        "moves": [
+          "d4","d5","c4","dxc4","Nf3","Nf6",
+          "e3","e6","Bxc4","c5"
+        ]
+      },
+      {
+        "name": "Slav",
+        "moves": [
+          "d4","d5","c4","c6","Nf3","Nf6",
+          "Nc3","dxc4","a4","Bf5"
+        ]
       }
     ],
     "London System": [
@@ -91,6 +133,20 @@
           "e3", "e6",
           "Nf3", "c5",
           "c3", "Nc6"
+        ]
+      },
+      {
+        "name": "London vs g6",
+        "moves": [
+          "d4","Nf6","Bf4","g6","e3","Bg7",
+          "Nf3","O-O","h3","d6"
+        ]
+      },
+      {
+        "name": "London vs c5 early",
+        "moves": [
+          "d4","d5","Bf4","Nf6","e3","c5",
+          "c3","Nc6","Nd2","Bf5"
         ]
       }
     ],
@@ -106,6 +162,20 @@
           "Be2", "Ne7",
           "O-O", "c5"
         ]
+      },
+      {
+        "name": "Short Variation",
+        "moves": [
+          "e4","c6","d4","d5","e5","Bf5",
+          "Nf3","e6","Be2","c5","O-O","Nc6"
+        ]
+      },
+      {
+        "name": "Tal Variation",
+        "moves": [
+          "e4","c6","d4","d5","e5","Bf5",
+          "h4","h5","Bd3","Bxd3","Qxd3","e6"
+        ]
       }
     ],
     "Caro-Kann-Exchange": [
@@ -119,6 +189,20 @@
           "c3", "Nf6",
           "Bf4", "Bg4"
         ]
+      },
+      {
+        "name": "Panov Attack",
+        "moves": [
+          "e4","c6","d4","d5","exd5","cxd5",
+          "c4","Nf6","Nc3","e6","Nf3","Nc6"
+        ]
+      },
+      {
+        "name": "Classical Exchange",
+        "moves": [
+          "e4","c6","d4","d5","exd5","cxd5",
+          "Bd3","Nc6","c3","Nf6","Bf4","Bg4"
+        ]
       }
     ],
     "French Exchange": [
@@ -130,6 +214,20 @@
           "exd5", "exd5",
           "Bd3", "Nc6",
           "c3", "Nf6"
+        ]
+      },
+      {
+        "name": "Symmetrical",
+        "moves": [
+          "e4","e6","d4","d5","exd5","exd5",
+          "Bd3","Bd6","Nf3","Nf6","O-O","O-O"
+        ]
+      },
+      {
+        "name": "Early c4",
+        "moves": [
+          "e4","e6","d4","d5","exd5","exd5",
+          "c4","Nf6","Nc3","Be7"
         ]
       }
     ],
@@ -143,6 +241,20 @@
           "d4", "Nf6",
           "Nf3", "Nc6"
         ]
+      },
+      {
+        "name": "Alapin 2...Nf6",
+        "moves": [
+          "e4","c5","c3","Nf6","e5","Nd5",
+          "d4","cxd4","Nf3","Nc6"
+        ]
+      },
+      {
+        "name": "Alapin 2...d5",
+        "moves": [
+          "e4","c5","c3","d5","exd5","Qxd5",
+          "d4","Nf6","Nf3","Nc6"
+        ]
       }
     ],
     "King's Indian Attack": [
@@ -154,6 +266,20 @@
           "Bg2", "e6",
           "O-O", "Be7",
           "d3", "O-O"
+        ]
+      },
+      {
+        "name": "vs French setup",
+        "moves": [
+          "e4","e6","d3","d5","Nd2","Nf6",
+          "Ngf3","Be7","g3","O-O","Bg2","c5"
+        ]
+      },
+      {
+        "name": "vs Sicilian setup",
+        "moves": [
+          "Nf3","c5","g3","Nc6","Bg2","g6",
+          "O-O","Bg7","d3","d6"
         ]
       }
     ]
@@ -172,22 +298,35 @@
           "Be2", "e6",
           "O-O", "Ngf6"
         ]
-      }
-    ],
-    "Caro-Kann Advance": [
+      },
       {
-        "name": "main",
+        "name": "Classical",
         "moves": [
-          "e4", "c6",
-          "d4", "d5",
-          "e5", "Bf5",
-          "Nc3", "e6",
-          "Nf3", "Nd7",
-          "Be2", "Ne7",
-          "O-O", "c5"
+          "e4","c6","d4","d5","Nc3","dxe4",
+          "Nxe4","Bf5","Ng3","Bg6","h4","h6"
         ]
-      }
+      },
+      {
+        "name": "Karpov Variation",
+        "moves": [
+          "e4","c6","d4","d5","Nd2","dxe4",
+          "Nxe4","Nd7","Nf3","Ngf6"
+        ]
+      },
+        {
+          "name": "Caro-Kann Advance",
+          "moves": [
+            "e4", "c6",
+            "d4", "d5",
+            "e5", "Bf5",
+            "Nc3", "e6",
+            "Nf3", "Nd7",
+            "Be2", "Ne7",
+            "O-O", "c5"
+          ]
+        }
     ],
+
     "French Defense": [
       {
         "name": "main",
@@ -197,6 +336,20 @@
           "Nc3", "Nf6",
           "Bg5", "Be7",
           "e5", "Nfd7"
+        ]
+      },
+      {
+        "name": "Advance",
+        "moves": [
+          "e4","e6","d4","d5","e5","c5",
+          "c3","Nc6","Nf3","Qb6"
+        ]
+      },
+      {
+        "name": "Exchange",
+        "moves": [
+          "e4","e6","d4","d5","exd5","exd5",
+          "Bd3","Nf6","Nf3","Bd6"
         ]
       }
     ],
@@ -210,6 +363,20 @@
           "d4", "Nf6",
           "Nf3", "c6",
           "Bc4", "Bf5"
+        ]
+      },
+      {
+        "name": "Qa5",
+        "moves": [
+          "e4","d5","exd5","Qxd5","Nc3","Qa5",
+          "d4","Nf6","Nf3","c6"
+        ]
+      },
+      {
+        "name": "Modern Scandinavian",
+        "moves": [
+          "e4","d5","exd5","Nf6","d4","Nxd5",
+          "c4","Nb6","Nc3","g6"
         ]
       }
     ],
@@ -249,6 +416,20 @@
           "Nf3", "dxc4",
           "a4", "Bf5"
         ]
+      },
+      {
+        "name": "Main Slav",
+        "moves": [
+          "d4","d5","c4","c6","Nc3","Nf6",
+          "Nf3","dxc4","a4","Bf5","e3","e6"
+        ]
+      },
+      {
+        "name": "Semi-Slav",
+        "moves": [
+          "d4","d5","c4","c6","Nc3","Nf6",
+          "Nf3","e6","e3","Nbd7"
+        ]
       }
     ],
     "London vs setup": [
@@ -273,6 +454,20 @@
           "e4", "d6",
           "Nf3", "O-O"
         ]
+      },
+      {
+        "name": "Classical",
+        "moves": [
+          "d4","Nf6","c4","g6","Nc3","Bg7",
+          "e4","d6","Nf3","O-O","Be2","e5"
+        ]
+      },
+      {
+        "name": "Fianchetto",
+        "moves": [
+          "d4","Nf6","c4","g6","Nf3","Bg7",
+          "g3","O-O","Bg2","d6"
+        ]
       }
     ],
     "Pirc Defense": [
@@ -284,6 +479,20 @@
           "Nc3", "g6",
           "Nf3", "Bg7",
           "Be2", "O-O"
+        ]
+      },
+      {
+        "name": "Classical",
+        "moves": [
+          "e4","d6","d4","Nf6","Nc3","g6",
+          "Nf3","Bg7","Be2","O-O","O-O","c6"
+        ]
+      },
+      {
+        "name": "Austrian Attack",
+        "moves": [
+          "e4","d6","d4","Nf6","Nc3","g6",
+          "f4","Bg7","Nf3","O-O"
         ]
       }
     ],
@@ -297,23 +506,24 @@
           "Nf3", "Nf6",
           "Be2", "O-O"
         ]
-      }
-    ],
-    "Ruy Lopez - Exchange vs Bd6": [
+      },
       {
-        "name": "main",
+        "name": "Modern Main",
         "moves": [
-          "e4", "e5",
-          "Nf3", "Nc6",
-          "Bb5", "Nf6",
-          "Bxc6", "dxc6",
-          "d4", "exd4",
-          "Qxd4", "Qxd4",
-          "Nxd4", "Nxe4"
+          "e4","g6","d4","Bg7","Nc3","d6",
+          "Nf3","a6","Be2","b5"
+        ]
+      },
+      {
+        "name": "Modern with c5",
+        "moves": [
+          "e4","g6","d4","Bg7","Nc3","c5",
+          "dxc5","Qa5"
         ]
       }
     ],
-    "Ruy Lopez - simple for black": [
+    "Ruy Lopez": [
+
       {
         "name": "main",
         "moves": [
@@ -325,6 +535,18 @@
           "d3", "d6",
           "c3", "O-O",
           "Re1", "Re8"
+        ]
+      },
+      {
+        "name": "Exchange vs Bd6",
+        "moves": [
+          "e4", "e5",
+          "Nf3", "Nc6",
+          "Bb5", "Nf6",
+          "Bxc6", "dxc6",
+          "d4", "exd4",
+          "Qxd4", "Qxd4",
+          "Nxd4", "Nxe4"
         ]
       }
     ]
