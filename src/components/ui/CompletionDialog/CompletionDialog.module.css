@@ -1,0 +1,116 @@
+.backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 1200;
+  display: grid;
+  place-items: center;
+  padding: 24px;
+  background:
+    radial-gradient(420px 220px at 50% 35%, rgba(226, 179, 87, 0.16), transparent 70%),
+    rgba(5, 8, 12, 0.68);
+  backdrop-filter: blur(10px);
+  animation: fadeIn 0.22s ease-out both;
+}
+
+.dialog {
+  position: relative;
+  width: min(100%, 440px);
+  padding: 28px 28px 24px;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: 24px;
+  background:
+    linear-gradient(180deg, rgba(31, 38, 51, 0.96), rgba(16, 21, 30, 0.98)),
+    var(--bg-panel);
+  box-shadow:
+    0 24px 60px rgba(0, 0, 0, 0.42),
+    0 0 0 1px rgba(255, 255, 255, 0.03) inset,
+    0 18px 40px rgba(226, 179, 87, 0.12);
+  overflow: hidden;
+  animation: dialogIn 0.28s cubic-bezier(0.2, 0.9, 0.28, 1) both;
+}
+
+.dialog::before {
+  content: '';
+  position: absolute;
+  inset: 0 0 auto;
+  height: 4px;
+  background: linear-gradient(90deg, rgba(226, 179, 87, 0.35), var(--accent), rgba(97, 197, 255, 0.45));
+}
+
+.kicker {
+  display: inline-flex;
+  margin-bottom: 14px;
+  padding: 6px 12px;
+  border: 1px solid rgba(226, 179, 87, 0.22);
+  border-radius: 999px;
+  background: rgba(226, 179, 87, 0.1);
+  color: var(--accent-strong);
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.title {
+  margin: 0;
+  color: var(--text-strong);
+  font-family: var(--font-display);
+  font-size: clamp(1.5rem, 1.2rem + 1vw, 2rem);
+  line-height: 1.05;
+}
+
+.text {
+  margin: 14px 0 0;
+  color: var(--text);
+  font-size: 1rem;
+  line-height: 1.65;
+}
+
+.subtext {
+  margin: 8px 0 0;
+  color: var(--text-muted);
+  font-size: 0.94rem;
+  line-height: 1.55;
+}
+
+.action {
+  margin-top: 22px;
+  min-width: 132px;
+}
+
+@media (max-width: 767px) {
+  .backdrop {
+    padding: 16px;
+  }
+
+  .dialog {
+    padding: 24px 18px 20px;
+    border-radius: 22px;
+  }
+
+  .action {
+    margin-top: 18px;
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes dialogIn {
+  from {
+    opacity: 0;
+    transform: translateY(14px) scale(0.96);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
