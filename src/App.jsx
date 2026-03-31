@@ -1,5 +1,6 @@
 import Header from './components/Header/Header'
 import Desk from './components/Desk/Desk'
+import CompletionDialog from './components/ui/CompletionDialog/CompletionDialog'
 import useOpeningsLoader from './hooks/useOpeningsLoader'
 import useTrainerBoard from './hooks/useTrainerBoard'
 import styles from './App.module.css'
@@ -17,11 +18,13 @@ function App() {
     variationOptions,
     showVariationSelect,
     feedback,
+    openingComplete,
     isShowing,
     isPaused,
     onSideToggle,
     onSelectChange,
     onVariationChange,
+    onCompletionAcknowledge,
     onReset,
     onShow,
     onPause,
@@ -52,6 +55,12 @@ function App() {
       >
         {feedback.text}
       </div>
+      <CompletionDialog
+        open={openingComplete}
+        openingName={selectedOpening}
+        side={currentSide}
+        onConfirm={onCompletionAcknowledge}
+      />
     </div>
   )
 }

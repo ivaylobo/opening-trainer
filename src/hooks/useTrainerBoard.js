@@ -312,11 +312,6 @@ export default function useTrainerBoard() {
     openingCompleteRef.current = true
     dispatch(setOpeningComplete(true))
     setFeedbackState('Opening complete!', 'correct')
-
-    setTimeout(() => {
-      alert('You successfully finished the opening')
-      resetRef.current()
-    }, 1000)
   }, [dispatch, setFeedbackState])
 
   const playOpponentMove = useCallback(
@@ -934,11 +929,13 @@ export default function useTrainerBoard() {
     variationOptions,
     showVariationSelect,
     feedback,
+    openingComplete,
     isShowing,
     isPaused,
     onSideToggle: handleSideToggle,
     onSelectChange: handleSelectChange,
     onVariationChange: handleVariationChange,
+    onCompletionAcknowledge: reset,
     onReset: reset,
     onShow: showOpening,
     onPause: togglePausePreview,
