@@ -18,15 +18,17 @@ export default function Header({
   isShowing,
   isPaused,
 }) {
+  const nextSide = currentSide === 'white' ? 'black' : 'white'
+
   return (
     <header className={styles.controls}>
       <Button
         variant="sideToggle"
-        tone={currentSide}
+        tone={nextSide}
         onClick={onSideToggle}
-        aria-label={`Current repertoire: ${currentSide}`}
+        aria-label={`Switch repertoire to ${nextSide}`}
       >
-        {currentSide === 'white' ? 'White' : 'Black'}
+        {nextSide === 'white' ? 'White' : 'Black'}
       </Button>
       <Select
         options={openingNames}
