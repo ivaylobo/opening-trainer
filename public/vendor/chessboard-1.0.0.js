@@ -1108,77 +1108,37 @@
     // -------------------------------------------------------------------------
 
     function drawPositionInstant () {
-      var availablePieces = []
-      var i
-
-      for (i in squareElsIds) {
+      for (var i in squareElsIds) {
         if (!squareElsIds.hasOwnProperty(i)) continue
-
-        var squareId = squareElsIds[i]
-        $('#' + squareId).find('.' + CSS.piece).each(function () {
-          availablePieces.push({
-            $el: $(this),
-            piece: $(this).attr('data-piece') || '',
-            square: i,
-            claimed: false
-          })
-        })
-      }
-
-      function claimPiece (square, piece) {
-        var j
-
-        for (j = 0; j < availablePieces.length; j++) {
-          if (
-            availablePieces[j].claimed !== true &&
-            availablePieces[j].square === square &&
-            availablePieces[j].piece === piece
-          ) {
-            availablePieces[j].claimed = true
-            return availablePieces[j]
-          }
-        }
-
-        for (j = 0; j < availablePieces.length; j++) {
-          if (
-            availablePieces[j].claimed !== true &&
-            availablePieces[j].piece === piece
-          ) {
-            availablePieces[j].claimed = true
-            return availablePieces[j]
-          }
-        }
-
-        return null
-      }
-
-      for (i in squareElsIds) {
-        if (!squareElsIds.hasOwnProperty(i)) continue
-
-        var nextPiece = currentPosition.hasOwnProperty(i) ? currentPosition[i] : false
-        if (!nextPiece) continue
 
         var $square = $('#' + squareElsIds[i])
-        var claimedPiece = claimPiece(i, nextPiece)
+        var $pieces = $square.find('.' + CSS.piece)
+        var nextPiece = currentPosition.hasOwnProperty(i) ? currentPosition[i] : false
 
-        if (!claimedPiece) {
-          $square.append(buildPieceHTML(nextPiece))
-          availablePieces.push({
-            $el: $square.find('.' + CSS.piece).last(),
-            piece: nextPiece,
-            square: i,
-            claimed: true
-          })
+        if (!nextPiece) {
+          if ($pieces.length > 0) {
+            $pieces.remove()
+          }
           continue
         }
 
-        claimedPiece.square = i
-
-        if (claimedPiece.$el.parent().attr('id') !== squareElsIds[i]) {
-          $square.append(claimedPiece.$el)
+        if ($pieces.length === 0) {
+          $square.append(buildPieceHTML(nextPiece))
+          continue
         }
 
-        claimedPiece.$el
+        var $piece = $pieces.first()
+        if ($pieces.length > 1) {
+          $pieces.not($piece).remove()
+        }
+
+        if ($piece.attr('data-piece') !== nextPiece) {
+          $piece.remove()
+          $square.append(buildPieceHTML(nextPiece))
+          continue
+        }
+
+        $piece
           .attr('data-piece', nextPiece)
           .attr('src', buildPieceImgSrc(nextPiece))
           .css({
@@ -1186,12 +1146,6 @@
             height: squareSize + 'px',
             width: squareSize + 'px'
           })
-      }
-
-      for (i = 0; i < availablePieces.length; i++) {
-        if (availablePieces[i].claimed !== true) {
-          availablePieces[i].$el.remove()
-        }
       }
     }
 
