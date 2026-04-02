@@ -333,7 +333,13 @@ export default function useTrainerBoard() {
         const nextMoveSan = currentOpeningRef.current[moveIndexRef.current]
         const autoMove = game.move(nextMoveSan)
 
-        if (!autoMove) return
+        if (!autoMove) {
+          setFeedbackState(
+            `Opening data error: invalid move "${nextMoveSan}" at ply ${moveIndexRef.current + 1}.`,
+            'wrong',
+          )
+          return
+        }
 
         renderMove(autoMove, game)
         const nextIndex = moveIndexRef.current + 1
@@ -354,7 +360,7 @@ export default function useTrainerBoard() {
 
       runMove()
     },
-    [finishOpening, getPlayerColor, renderMove, setMoveIndexState],
+    [finishOpening, getPlayerColor, renderMove, setFeedbackState, setMoveIndexState],
   )
 
   const startSessionRuntime = useCallback(
