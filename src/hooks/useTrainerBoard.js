@@ -527,10 +527,7 @@ export default function useTrainerBoard() {
       setFeedbackState('Good!', 'correct')
 
       if (applyMoveOnBoard) {
-        const board = boardInstanceRef.current
-        if (board) {
-          board.position(game.fen(), false)
-        }
+        renderMove(move, game)
       } else {
         applyCastlingRook(move)
       }
@@ -546,7 +543,15 @@ export default function useTrainerBoard() {
 
       return 'ok'
     },
-    [applyCastlingRook, finishOpening, getPlayerColor, playOpponentMove, setFeedbackState, setMoveIndexState],
+    [
+      applyCastlingRook,
+      finishOpening,
+      getPlayerColor,
+      playOpponentMove,
+      renderMove,
+      setFeedbackState,
+      setMoveIndexState,
+    ],
   )
 
   const handleTouchTap = useCallback(
