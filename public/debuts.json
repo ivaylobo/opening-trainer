@@ -58,6 +58,49 @@
         ]
       }
     ],
+    "Bishop's Opening": [
+      {
+        "name": "Classical setup",
+        "moves": [
+          "e4", "e5",
+          "Bc4", "Nf6",
+          "d3", "Bc5",
+          "Nf3", "d6",
+          "Nc3", "Nc6",
+          "Bg5", "h6",
+          "Bh4", "g5",
+          "Bg3"
+        ]
+      },
+      {
+        "name": "Urusov Gambit Accepted",
+        "moves": [
+          "e4", "e5",
+          "Bc4", "Nf6",
+          "d4", "exd4",
+          "Nf3", "Nxe4",
+          "Qxd4", "Nf6",
+          "Bg5", "Be7",
+          "Nc3", "O-O",
+          "O-O-O"
+        ]
+      },
+      {
+        "name": "Berlin, Ponziani, Urusov Gambit - from game",
+        "moves": [
+          "e4", "e5",
+          "Bc4", "Nf6",
+          "d4", "exd4",
+          "Nf3", "c5",
+          "e5", "Ng8",
+          "O-O", "Be7",
+          "c3", "dxc3",
+          "Nxc3", "a6",
+          "Qd5", "Nh6",
+          "Bxh6"
+        ]
+      }
+    ],
     "Ruy Lopez": [
       {
         "name": "main",
